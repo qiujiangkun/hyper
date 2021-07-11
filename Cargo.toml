@@ -1,5 +1,5 @@
 [package]
-name = "hyper"
+name = "hyper-no-rt"
 version = "0.14.10" # don't forget to update html_root_url
 description = "A fast and correct HTTP library."
 readme = "README.md"
@@ -84,7 +84,7 @@ full = [
     "http2",
     "server",
     "stream",
-    "runtime",
+#    "runtime",
 ]
 
 # HTTP versions
