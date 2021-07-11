@@ -5,16 +5,16 @@ use httparse::ParserConfig;
 use crate::body::DecodedLength;
 use crate::proto::{BodyLength, MessageHead};
 
-pub(crate) use self::conn::Conn;
-pub(crate) use self::decode::Decoder;
-pub(crate) use self::dispatch::Dispatcher;
-pub(crate) use self::encode::{EncodedBuf, Encoder};
+pub use self::conn::Conn;
+pub use self::decode::Decoder;
+pub use self::dispatch::Dispatcher;
+pub use self::encode::{EncodedBuf, Encoder};
  //TODO: move out of h1::io
 pub(crate) use self::io::MINIMUM_MAX_BUFFER_SIZE;
 
 mod conn;
 mod decode;
-pub(crate) mod dispatch;
+pub mod dispatch;
 mod encode;
 mod io;
 mod role;
@@ -28,7 +28,7 @@ cfg_server! {
     pub(crate) type ServerTransaction = role::Server;
 }
 
-pub(crate) trait Http1Transaction {
+pub trait Http1Transaction {
     type Incoming;
     type Outgoing: Default;
     const LOG: &'static str;
@@ -60,7 +60,7 @@ pub(crate) trait Http1Transaction {
 pub(crate) type ParseResult<T> = Result<Option<ParsedMessage<T>>, crate::error::Parse>;
 
 #[derive(Debug)]
-pub(crate) struct ParsedMessage<T> {
+pub struct ParsedMessage<T> {
     head: MessageHead<T>,
     decode: DecodedLength,
     expect_continue: bool,
@@ -68,7 +68,7 @@ pub(crate) struct ParsedMessage<T> {
     wants_upgrade: bool,
 }
 
-pub(crate) struct ParseContext<'a> {
+pub struct ParseContext<'a> {
     cached_headers: &'a mut Option<HeaderMap>,
     req_method: &'a mut Option<Method>,
     h1_parser_config: ParserConfig,
@@ -79,7 +79,7 @@ pub(crate) struct ParseContext<'a> {
 }
 
 /// Passed to Http1Transaction::encode
-pub(crate) struct Encode<'a, T> {
+pub struct Encode<'a, T> {
     head: &'a mut MessageHead<T>,
     body: Option<BodyLength>,
     #[cfg(feature = "server")]

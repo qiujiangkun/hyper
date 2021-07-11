@@ -11,7 +11,7 @@ use crate::common::{task, Poll};
 pub(crate) type RetryPromise<T, U> = oneshot::Receiver<Result<U, (crate::Error, Option<T>)>>;
 pub(crate) type Promise<T> = oneshot::Receiver<Result<T, crate::Error>>;
 
-pub(crate) fn channel<T, U>() -> (Sender<T, U>, Receiver<T, U>) {
+pub fn channel<T, U>() -> (Sender<T, U>, Receiver<T, U>) {
     let (tx, rx) = mpsc::unbounded_channel();
     let (giver, taker) = want::new();
     let tx = Sender {
@@ -27,7 +27,7 @@ pub(crate) fn channel<T, U>() -> (Sender<T, U>, Receiver<T, U>) {
 ///
 /// While the inner sender is unbounded, the Giver is used to determine
 /// if the Receiver is ready for another request.
-pub(crate) struct Sender<T, U> {
+pub struct Sender<T, U> {
     /// One message is always allowed, even if the Receiver hasn't asked
     /// for it yet. This boolean keeps track of whether we've sent one
     /// without notice.
@@ -46,24 +46,24 @@ pub(crate) struct Sender<T, U> {
 /// Cannot poll the Giver, but can still use it to determine if the Receiver
 /// has been dropped. However, this version can be cloned.
 #[cfg(feature = "http2")]
-pub(crate) struct UnboundedSender<T, U> {
+pub struct UnboundedSender<T, U> {
     /// Only used for `is_closed`, since mpsc::UnboundedSender cannot be checked.
     giver: want::SharedGiver,
     inner: mpsc::UnboundedSender<Envelope<T, U>>,
 }
 
 impl<T, U> Sender<T, U> {
-    pub(crate) fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<crate::Result<()>> {
+    pub fn poll_ready(&mut self, cx: &mut task::Context<'_>) -> Poll<crate::Result<()>> {
         self.giver
             .poll_want(cx)
             .map_err(|_| crate::Error::new_closed())
     }
 
-    pub(crate) fn is_ready(&self) -> bool {
+    pub fn is_ready(&self) -> bool {
         self.giver.is_wanting()
     }
 
-    pub(crate) fn is_closed(&self) -> bool {
+    pub fn is_closed(&self) -> bool {
         self.giver.is_canceled()
     }
 
@@ -80,7 +80,7 @@ impl<T, U> Sender<T, U> {
         }
     }
 
-    pub(crate) fn try_send(&mut self, val: T) -> Result<RetryPromise<T, U>, T> {
+    pub fn try_send(&mut self, val: T) -> Result<RetryPromise<T, U>, T> {
         if !self.can_send() {
             return Err(val);
         }
@@ -91,7 +91,7 @@ impl<T, U> Sender<T, U> {
             .map_err(|mut e| (e.0).0.take().expect("envelope not dropped").0)
     }
 
-    pub(crate) fn send(&mut self, val: T) -> Result<Promise<U>, T> {
+    pub fn send(&mut self, val: T) -> Result<Promise<U>, T> {
         if !self.can_send() {
             return Err(val);
         }
@@ -103,7 +103,7 @@ impl<T, U> Sender<T, U> {
     }
 
     #[cfg(feature = "http2")]
-    pub(crate) fn unbound(self) -> UnboundedSender<T, U> {
+    pub fn unbound(self) -> UnboundedSender<T, U> {
         UnboundedSender {
             giver: self.giver.shared(),
             inner: self.inner,
@@ -113,15 +113,15 @@ impl<T, U> Sender<T, U> {
 
 #[cfg(feature = "http2")]
 impl<T, U> UnboundedSender<T, U> {
-    pub(crate) fn is_ready(&self) -> bool {
+    pub fn is_ready(&self) -> bool {
         !self.giver.is_canceled()
     }
 
-    pub(crate) fn is_closed(&self) -> bool {
+    pub fn is_closed(&self) -> bool {
         self.giver.is_canceled()
     }
 
-    pub(crate) fn try_send(&mut self, val: T) -> Result<RetryPromise<T, U>, T> {
+    pub fn try_send(&mut self, val: T) -> Result<RetryPromise<T, U>, T> {
         let (tx, rx) = oneshot::channel();
         self.inner
             .send(Envelope(Some((val, Callback::Retry(tx)))))
@@ -140,13 +140,13 @@ impl<T, U> Clone for UnboundedSender<T, U> {
     }
 }
 
-pub(crate) struct Receiver<T, U> {
+pub struct Receiver<T, U> {
     inner: mpsc::UnboundedReceiver<Envelope<T, U>>,
     taker: want::Taker,
 }
 
 impl<T, U> Receiver<T, U> {
-    pub(crate) fn poll_recv(
+    pub fn poll_recv(
         &mut self,
         cx: &mut task::Context<'_>,
     ) -> Poll<Option<(T, Callback<T, U>)>> {
@@ -162,13 +162,13 @@ impl<T, U> Receiver<T, U> {
     }
 
     #[cfg(feature = "http1")]
-    pub(crate) fn close(&mut self) {
+    pub fn close(&mut self) {
         self.taker.cancel();
         self.inner.close();
     }
 
     #[cfg(feature = "http1")]
-    pub(crate) fn try_recv(&mut self) -> Option<(T, Callback<T, U>)> {
+    pub fn try_recv(&mut self) -> Option<(T, Callback<T, U>)> {
         match self.inner.recv().now_or_never() {
             Some(Some(mut env)) => env.0.take(),
             _ => None,
@@ -204,21 +204,21 @@ pub(crate) enum Callback<T, U> {
 
 impl<T, U> Callback<T, U> {
     #[cfg(feature = "http2")]
-    pub(crate) fn is_canceled(&self) -> bool {
+    pub fn is_canceled(&self) -> bool {
         match *self {
             Callback::Retry(ref tx) => tx.is_closed(),
             Callback::NoRetry(ref tx) => tx.is_closed(),
         }
     }
 
-    pub(crate) fn poll_canceled(&mut self, cx: &mut task::Context<'_>) -> Poll<()> {
+    pub fn poll_canceled(&mut self, cx: &mut task::Context<'_>) -> Poll<()> {
         match *self {
             Callback::Retry(ref mut tx) => tx.poll_closed(cx),
             Callback::NoRetry(ref mut tx) => tx.poll_closed(cx),
         }
     }
 
-    pub(crate) fn send(self, val: Result<U, (crate::Error, Option<T>)>) {
+    pub fn send(self, val: Result<U, (crate::Error, Option<T>)>) {
         match self {
             Callback::Retry(tx) => {
                 let _ = tx.send(val);

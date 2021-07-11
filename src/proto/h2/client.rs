@@ -37,7 +37,7 @@ const DEFAULT_STREAM_WINDOW: u32 = 1024 * 1024 * 2; // 2mb
 const DEFAULT_MAX_FRAME_SIZE: u32 = 1024 * 16; // 16kb
 
 #[derive(Clone, Debug)]
-pub(crate) struct Config {
+pub struct Config {
     pub(crate) adaptive_window: bool,
     pub(crate) initial_conn_window_size: u32,
     pub(crate) initial_stream_window_size: u32,
@@ -187,7 +187,7 @@ where
     }
 }
 
-pub(crate) struct ClientTask<B>
+pub struct ClientTask<B>
 where
     B: HttpBody,
 {

@@ -33,7 +33,7 @@ struct DuplexInner {
 
 #[cfg(feature = "runtime")]
 impl Duplex {
-    pub(crate) fn channel() -> (Duplex, DuplexHandle) {
+    pub fn channel() -> (Duplex, DuplexHandle) {
         let mut inner = DuplexInner {
             handle_read_task: None,
             read: AsyncIo::new_buf(Vec::new(), 0),

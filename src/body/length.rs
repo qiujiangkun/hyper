@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) struct DecodedLength(u64);
+pub struct DecodedLength(u64);
 
 #[cfg(any(feature = "http1", feature = "http2"))]
 impl From<Option<u64>> for DecodedLength {
@@ -23,7 +23,7 @@ impl DecodedLength {
     pub(crate) const ZERO: DecodedLength = DecodedLength(0);
 
     #[cfg(test)]
-    pub(crate) fn new(len: u64) -> Self {
+    pub fn new(len: u64) -> Self {
         debug_assert!(len <= MAX_LEN);
         DecodedLength(len)
     }
@@ -34,13 +34,13 @@ impl DecodedLength {
     /// CLOSE_DELIMITED or CHUNKED.
     #[inline]
     #[cfg(feature = "http1")]
-    pub(crate) fn danger_len(self) -> u64 {
+    pub fn danger_len(self) -> u64 {
         debug_assert!(self.0 < Self::CHUNKED.0);
         self.0
     }
 
     /// Converts to an Option<u64> representing a Known or Unknown length.
-    pub(crate) fn into_opt(self) -> Option<u64> {
+    pub fn into_opt(self) -> Option<u64> {
         match self {
             DecodedLength::CHUNKED | DecodedLength::CLOSE_DELIMITED => None,
             DecodedLength(known) => Some(known),
@@ -49,7 +49,7 @@ impl DecodedLength {
 
     /// Checks the `u64` is within the maximum allowed for content-length.
     #[cfg(any(feature = "http1", feature = "http2"))]
-    pub(crate) fn checked_new(len: u64) -> Result<Self, crate::error::Parse> {
+    pub fn checked_new(len: u64) -> Result<Self, crate::error::Parse> {
         if len <= MAX_LEN {
             Ok(DecodedLength(len))
         } else {
@@ -58,7 +58,7 @@ impl DecodedLength {
         }
     }
 
-    pub(crate) fn sub_if(&mut self, amt: u64) {
+    pub fn sub_if(&mut self, amt: u64) {
         match *self {
             DecodedLength::CHUNKED | DecodedLength::CLOSE_DELIMITED => (),
             DecodedLength(ref mut known) => {

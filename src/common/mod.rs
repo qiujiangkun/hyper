@@ -7,21 +7,21 @@ macro_rules! ready {
     };
 }
 
-pub(crate) mod buf;
+pub mod buf;
 #[cfg(all(feature = "server", any(feature = "http1", feature = "http2")))]
-pub(crate) mod date;
+pub mod date;
 #[cfg(all(feature = "server", any(feature = "http1", feature = "http2")))]
-pub(crate) mod drain;
+pub mod drain;
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub(crate) mod exec;
-pub(crate) mod io;
+pub mod exec;
+pub mod io;
 #[cfg(all(feature = "client", any(feature = "http1", feature = "http2")))]
 mod lazy;
 mod never;
 #[cfg(feature = "stream")]
-pub(crate) mod sync_wrapper;
-pub(crate) mod task;
-pub(crate) mod watch;
+pub mod sync_wrapper;
+pub mod task;
+pub mod watch;
 
 #[cfg(all(feature = "client", any(feature = "http1", feature = "http2")))]
 pub(crate) use self::lazy::{lazy, Started as Lazy};

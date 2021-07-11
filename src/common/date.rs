@@ -11,21 +11,21 @@ use httpdate::HttpDate;
 pub(crate) const DATE_VALUE_LENGTH: usize = 29;
 
 #[cfg(feature = "http1")]
-pub(crate) fn extend(dst: &mut Vec<u8>) {
+pub fn extend(dst: &mut Vec<u8>) {
     CACHED.with(|cache| {
         dst.extend_from_slice(cache.borrow().buffer());
     })
 }
 
 #[cfg(feature = "http1")]
-pub(crate) fn update() {
+pub fn update() {
     CACHED.with(|cache| {
         cache.borrow_mut().check();
     })
 }
 
 #[cfg(feature = "http2")]
-pub(crate) fn update_and_header_value() -> HeaderValue {
+pub fn update_and_header_value() -> HeaderValue {
     CACHED.with(|cache| {
         let mut cache = cache.borrow_mut();
         cache.check();

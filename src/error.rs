@@ -500,15 +500,15 @@ impl From<Parse> for Error {
 
 #[cfg(feature = "http1")]
 impl Parse {
-    pub(crate) fn content_length_invalid() -> Self {
+    pub fn content_length_invalid() -> Self {
         Parse::Header(Header::ContentLengthInvalid)
     }
 
-    pub(crate) fn transfer_encoding_invalid() -> Self {
+    pub fn transfer_encoding_invalid() -> Self {
         Parse::Header(Header::TransferEncodingInvalid)
     }
 
-    pub(crate) fn transfer_encoding_unexpected() -> Self {
+    pub fn transfer_encoding_unexpected() -> Self {
         Parse::Header(Header::TransferEncodingUnexpected)
     }
 }

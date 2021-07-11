@@ -25,9 +25,9 @@ pub struct hyper_headers {
 }
 
 #[derive(Debug)]
-pub(crate) struct ReasonPhrase(pub(crate) Bytes);
+pub struct ReasonPhrase(pub(crate) Bytes);
 
-pub(crate) struct RawHeaders(pub(crate) hyper_buf);
+pub struct RawHeaders(pub(crate) hyper_buf);
 
 // ===== impl hyper_request =====
 

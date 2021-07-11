@@ -29,7 +29,7 @@ pub(crate) const DEFAULT_MAX_BUFFER_SIZE: usize = 8192 + 4096 * 100;
 /// forces a flush if the queue gets this big.
 const MAX_BUF_LIST_BUFFERS: usize = 16;
 
-pub(crate) struct Buffered<T, B> {
+pub struct Buffered<T, B> {
     flush_pipeline: bool,
     io: T,
     read_blocked: bool,
@@ -55,7 +55,7 @@ where
     T: AsyncRead + AsyncWrite + Unpin,
     B: Buf,
 {
-    pub(crate) fn new(io: T) -> Buffered<T, B> {
+    pub fn new(io: T) -> Buffered<T, B> {
         let strategy = if io.is_write_vectored() {
             WriteStrategy::Queue
         } else {
@@ -73,7 +73,7 @@ where
     }
 
     #[cfg(feature = "server")]
-    pub(crate) fn set_flush_pipeline(&mut self, enabled: bool) {
+    pub fn set_flush_pipeline(&mut self, enabled: bool) {
         debug_assert!(!self.write_buf.has_remaining());
         self.flush_pipeline = enabled;
         if enabled {
@@ -81,7 +81,7 @@ where
         }
     }
 
-    pub(crate) fn set_max_buf_size(&mut self, max: usize) {
+    pub fn set_max_buf_size(&mut self, max: usize) {
         assert!(
             max >= MINIMUM_MAX_BUFFER_SIZE,
             "The max_buf_size cannot be smaller than {}.",
@@ -92,19 +92,19 @@ where
     }
 
     #[cfg(feature = "client")]
-    pub(crate) fn set_read_buf_exact_size(&mut self, sz: usize) {
+    pub fn set_read_buf_exact_size(&mut self, sz: usize) {
         self.read_buf_strategy = ReadStrategy::Exact(sz);
     }
 
     #[cfg(feature = "server")]
-    pub(crate) fn set_write_strategy_flatten(&mut self) {
+    pub fn set_write_strategy_flatten(&mut self) {
         // this should always be called only at construction time,
         // so this assert is here to catch myself
         debug_assert!(self.write_buf.queue.bufs_cnt() == 0);
         self.write_buf.set_strategy(WriteStrategy::Flatten);
     }
 
-    pub(crate) fn read_buf(&self) -> &[u8] {
+    pub fn read_buf(&self) -> &[u8] {
         self.read_buf.as_ref()
     }
 
@@ -120,7 +120,7 @@ where
         self.read_buf.capacity() - self.read_buf.len()
     }
 
-    pub(crate) fn headers_buf(&mut self) -> &mut Vec<u8> {
+    pub fn headers_buf(&mut self) -> &mut Vec<u8> {
         let buf = self.write_buf.headers_mut();
         &mut buf.bytes
     }
@@ -129,15 +129,15 @@ where
         &mut self.write_buf
     }
 
-    pub(crate) fn buffer<BB: Buf + Into<B>>(&mut self, buf: BB) {
+    pub fn buffer<BB: Buf + Into<B>>(&mut self, buf: BB) {
         self.write_buf.buffer(buf)
     }
 
-    pub(crate) fn can_buffer(&self) -> bool {
+    pub fn can_buffer(&self) -> bool {
         self.flush_pipeline || self.write_buf.can_buffer()
     }
 
-    pub(crate) fn consume_leading_lines(&mut self) {
+    pub fn consume_leading_lines(&mut self) {
         if !self.read_buf.is_empty() {
             let mut i = 0;
             while i < self.read_buf.len() {
@@ -190,7 +190,7 @@ where
         }
     }
 
-    pub(crate) fn poll_read_from_io(
+    pub fn poll_read_from_io(
         &mut self,
         cx: &mut task::Context<'_>,
     ) -> Poll<io::Result<usize>> {
@@ -223,19 +223,19 @@ where
         }
     }
 
-    pub(crate) fn into_inner(self) -> (T, Bytes) {
+    pub fn into_inner(self) -> (T, Bytes) {
         (self.io, self.read_buf.freeze())
     }
 
-    pub(crate) fn io_mut(&mut self) -> &mut T {
+    pub fn io_mut(&mut self) -> &mut T {
         &mut self.io
     }
 
-    pub(crate) fn is_read_blocked(&self) -> bool {
+    pub fn is_read_blocked(&self) -> bool {
         self.read_blocked
     }
 
-    pub(crate) fn poll_flush(&mut self, cx: &mut task::Context<'_>) -> Poll<io::Result<()>> {
+    pub fn poll_flush(&mut self, cx: &mut task::Context<'_>) -> Poll<io::Result<()>> {
         if self.flush_pipeline && !self.read_buf.is_empty() {
             Poll::Ready(Ok(()))
         } else if self.write_buf.remaining() == 0 {
@@ -304,7 +304,7 @@ where
 impl<T: Unpin, B> Unpin for Buffered<T, B> {}
 
 // TODO: This trait is old... at least rename to PollBytes or something...
-pub(crate) trait MemRead {
+pub trait MemRead {
     fn read_mem(&mut self, cx: &mut task::Context<'_>, len: usize) -> Poll<io::Result<Bytes>>;
 }
 
@@ -413,14 +413,14 @@ impl Default for ReadStrategy {
 }
 
 #[derive(Clone)]
-pub(crate) struct Cursor<T> {
+pub struct Cursor<T> {
     bytes: T,
     pos: usize,
 }
 
 impl<T: AsRef<[u8]>> Cursor<T> {
     #[inline]
-    pub(crate) fn new(bytes: T) -> Cursor<T> {
+    pub fn new(bytes: T) -> Cursor<T> {
         Cursor { bytes, pos: 0 }
     }
 }

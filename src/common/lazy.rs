@@ -2,11 +2,11 @@ use pin_project_lite::pin_project;
 
 use super::{task, Future, Pin, Poll};
 
-pub(crate) trait Started: Future {
+pub trait Started: Future {
     fn started(&self) -> bool;
 }
 
-pub(crate) fn lazy<F, R>(func: F) -> Lazy<F, R>
+pub fn lazy<F, R>(func: F) -> Lazy<F, R>
 where
     F: FnOnce() -> R,
     R: Future + Unpin,
@@ -19,7 +19,7 @@ where
 // FIXME: allow() required due to `impl Trait` leaking types to this lint
 pin_project! {
     #[allow(missing_debug_implementations)]
-    pub(crate) struct Lazy<F, R> {
+    pub struct Lazy<F, R> {
         #[pin]
         inner: Inner<F, R>,
     }

@@ -139,7 +139,7 @@ impl Body {
         Self::new_channel(DecodedLength::CHUNKED, /*wanter =*/ false)
     }
 
-    pub(crate) fn new_channel(content_length: DecodedLength, wanter: bool) -> (Sender, Body) {
+    pub fn new_channel(content_length: DecodedLength, wanter: bool) -> (Sender, Body) {
         let (data_tx, data_rx) = mpsc::channel(0);
         let (trailers_tx, trailers_rx) = oneshot::channel();
 
@@ -202,7 +202,7 @@ impl Body {
     }
 
     #[cfg(all(feature = "http2", any(feature = "client", feature = "server")))]
-    pub(crate) fn h2(
+    pub fn h2(
         recv: h2::RecvStream,
         content_length: DecodedLength,
         ping: ping::Recorder,
@@ -218,7 +218,7 @@ impl Body {
 
     #[cfg(any(feature = "http1", feature = "http2"))]
     #[cfg(feature = "client")]
-    pub(crate) fn delayed_eof(&mut self, fut: DelayEofUntil) {
+    pub fn delayed_eof(&mut self, fut: DelayEofUntil) {
         self.extra_mut().delayed_eof = Some(DelayEof::NotEof(fut));
     }
 
@@ -273,7 +273,7 @@ impl Body {
     }
 
     #[cfg(feature = "ffi")]
-    pub(crate) fn as_ffi_mut(&mut self) -> &mut crate::ffi::UserBody {
+    pub fn as_ffi_mut(&mut self) -> &mut crate::ffi::UserBody {
         match self.kind {
             Kind::Ffi(ref mut body) => return body,
             _ => {
@@ -606,7 +606,7 @@ impl Sender {
     }
 
     #[cfg(feature = "http1")]
-    pub(crate) fn send_error(&mut self, err: crate::Error) {
+    pub fn send_error(&mut self, err: crate::Error) {
         let _ = self.data_tx.try_send(Err(err));
     }
 }

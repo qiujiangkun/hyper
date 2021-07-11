@@ -15,7 +15,7 @@ type Value = usize;
 
 pub(crate) const CLOSED: usize = 0;
 
-pub(crate) fn channel(initial: Value) -> (Sender, Receiver) {
+pub fn channel(initial: Value) -> (Sender, Receiver) {
     debug_assert!(
         initial != CLOSED,
         "watch::channel initial state of 0 is reserved"
@@ -34,11 +34,11 @@ pub(crate) fn channel(initial: Value) -> (Sender, Receiver) {
     )
 }
 
-pub(crate) struct Sender {
+pub struct Sender {
     shared: Arc<Shared>,
 }
 
-pub(crate) struct Receiver {
+pub struct Receiver {
     shared: Arc<Shared>,
 }
 
@@ -48,7 +48,7 @@ struct Shared {
 }
 
 impl Sender {
-    pub(crate) fn send(&mut self, value: Value) {
+    pub fn send(&mut self, value: Value) {
         if self.shared.value.swap(value, Ordering::SeqCst) != value {
             self.shared.waker.wake();
         }
@@ -62,12 +62,12 @@ impl Drop for Sender {
 }
 
 impl Receiver {
-    pub(crate) fn load(&mut self, cx: &mut task::Context<'_>) -> Value {
+    pub fn load(&mut self, cx: &mut task::Context<'_>) -> Value {
         self.shared.waker.register(cx.waker());
         self.shared.value.load(Ordering::SeqCst)
     }
 
-    pub(crate) fn peek(&self) -> Value {
+    pub fn peek(&self) -> Value {
         self.shared.value.load(Ordering::Relaxed)
     }
 }

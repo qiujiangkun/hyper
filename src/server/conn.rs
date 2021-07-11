@@ -1034,7 +1034,7 @@ where
     }
 }
 
-pub(crate) mod spawn_all {
+pub mod spawn_all {
     use std::error::Error as StdError;
     use tokio::io::{AsyncRead, AsyncWrite};
 

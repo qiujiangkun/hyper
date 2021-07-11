@@ -50,7 +50,7 @@ pub struct hyper_executor {
 }
 
 #[derive(Clone)]
-pub(crate) struct WeakExec(Weak<hyper_executor>);
+pub struct WeakExec(Weak<hyper_executor>);
 
 struct ExecWaker(AtomicBool);
 
@@ -92,7 +92,7 @@ pub(crate) unsafe trait AsTaskType {
     fn as_task_type(&self) -> hyper_task_return_type;
 }
 
-pub(crate) trait IntoDynTaskType {
+pub trait IntoDynTaskType {
     fn into_dyn_task_type(self) -> BoxAny;
 }
 
@@ -107,7 +107,7 @@ impl hyper_executor {
         })
     }
 
-    pub(crate) fn downgrade(exec: &Arc<hyper_executor>) -> WeakExec {
+    pub fn downgrade(exec: &Arc<hyper_executor>) -> WeakExec {
         WeakExec(Arc::downgrade(exec))
     }
 
@@ -172,7 +172,7 @@ impl futures_util::task::ArcWake for ExecWaker {
 // ===== impl WeakExec =====
 
 impl WeakExec {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         WeakExec(Weak::new())
     }
 }
@@ -236,7 +236,7 @@ ffi_fn! {
 // ===== impl hyper_task =====
 
 impl hyper_task {
-    pub(crate) fn boxed<F>(fut: F) -> Box<hyper_task>
+    pub fn boxed<F>(fut: F) -> Box<hyper_task>
     where
         F: Future + Send + 'static,
         F::Output: IntoDynTaskType + Send + Sync + 'static,
@@ -394,7 +394,7 @@ where
 // ===== impl hyper_context =====
 
 impl hyper_context<'_> {
-    pub(crate) fn wrap<'a, 'b>(cx: &'a mut Context<'b>) -> &'a mut hyper_context<'b> {
+    pub fn wrap<'a, 'b>(cx: &'a mut Context<'b>) -> &'a mut hyper_context<'b> {
         // A struct with only one field has the same layout as that field.
         unsafe { std::mem::transmute::<&mut Context<'_>, &mut hyper_context<'_>>(cx) }
     }

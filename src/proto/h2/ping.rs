@@ -113,7 +113,7 @@ pub(super) struct Config {
 }
 
 #[derive(Clone)]
-pub(crate) struct Recorder {
+pub struct Recorder {
     shared: Option<Arc<Mutex<Shared>>>,
 }
 
@@ -211,7 +211,7 @@ impl Config {
 // ===== impl Recorder =====
 
 impl Recorder {
-    pub(crate) fn record_data(&self, len: usize) {
+    pub fn record_data(&self, len: usize) {
         let shared = if let Some(ref shared) = self.shared {
             shared
         } else {
@@ -246,7 +246,7 @@ impl Recorder {
         }
     }
 
-    pub(crate) fn record_non_data(&self) {
+    pub fn record_non_data(&self) {
         #[cfg(feature = "runtime")]
         {
             let shared = if let Some(ref shared) = self.shared {

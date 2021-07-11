@@ -8,21 +8,21 @@ use crate::common::{task, Pin, Poll};
 
 /// Combine a buffer with an IO, rewinding reads to use the buffer.
 #[derive(Debug)]
-pub(crate) struct Rewind<T> {
+pub struct Rewind<T> {
     pre: Option<Bytes>,
     inner: T,
 }
 
 impl<T> Rewind<T> {
     #[cfg(any(all(feature = "http2", feature = "server"), test))]
-    pub(crate) fn new(io: T) -> Self {
+    pub fn new(io: T) -> Self {
         Rewind {
             pre: None,
             inner: io,
         }
     }
 
-    pub(crate) fn new_buffered(io: T, buf: Bytes) -> Self {
+    pub fn new_buffered(io: T, buf: Bytes) -> Self {
         Rewind {
             pre: Some(buf),
             inner: io,
@@ -30,16 +30,16 @@ impl<T> Rewind<T> {
     }
 
     #[cfg(any(all(feature = "http1", feature = "http2", feature = "server"), test))]
-    pub(crate) fn rewind(&mut self, bs: Bytes) {
+    pub fn rewind(&mut self, bs: Bytes) {
         debug_assert!(self.pre.is_none());
         self.pre = Some(bs);
     }
 
-    pub(crate) fn into_inner(self) -> (T, Bytes) {
+    pub fn into_inner(self) -> (T, Bytes) {
         (self.inner, self.pre.unwrap_or_else(Bytes::new))
     }
 
-    // pub(crate) fn get_mut(&mut self) -> &mut T {
+    // pub fn get_mut(&mut self) -> &mut T {
     //     &mut self.inner
     // }
 }

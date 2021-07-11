@@ -33,7 +33,7 @@ mod to_bytes;
 ///
 /// This is currently limited to *only* `hyper::Body`s.
 #[cfg(feature = "http1")]
-pub(crate) fn take_full_data<T: HttpBody + 'static>(body: &mut T) -> Option<T::Data> {
+pub fn take_full_data<T: HttpBody + 'static>(body: &mut T) -> Option<T::Data> {
     use std::any::{Any, TypeId};
 
     // This static type check can be optimized at compile-time.

@@ -3,26 +3,26 @@ use std::io::IoSlice;
 
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 
-pub(crate) struct BufList<T> {
+pub struct BufList<T> {
     bufs: VecDeque<T>,
 }
 
 impl<T: Buf> BufList<T> {
-    pub(crate) fn new() -> BufList<T> {
+    pub fn new() -> BufList<T> {
         BufList {
             bufs: VecDeque::new(),
         }
     }
 
     #[inline]
-    pub(crate) fn push(&mut self, buf: T) {
+    pub fn push(&mut self, buf: T) {
         debug_assert!(buf.has_remaining());
         self.bufs.push_back(buf);
     }
 
     #[inline]
     #[cfg(feature = "http1")]
-    pub(crate) fn bufs_cnt(&self) -> usize {
+    pub fn bufs_cnt(&self) -> usize {
         self.bufs.len()
     }
 }

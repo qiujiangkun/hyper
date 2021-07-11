@@ -1,7 +1,7 @@
 //! Pieces pertaining to the HTTP message protocol.
 
 cfg_http1! {
-    pub(crate) mod h1;
+    pub mod h1;
 
     pub(crate) use self::h1::Conn;
 
@@ -12,12 +12,12 @@ cfg_http1! {
 }
 
 cfg_http2! {
-    pub(crate) mod h2;
+    pub mod h2;
 }
 
 /// An Incoming Message head. Includes request/status line, and headers.
 #[derive(Debug, Default)]
-pub(crate) struct MessageHead<S> {
+pub struct MessageHead<S> {
     /// HTTP version of the message.
     pub(crate) version: http::Version,
     /// Subject (request line or status line) of Incoming message.
@@ -34,7 +34,7 @@ pub(crate) type RequestHead = MessageHead<RequestLine>;
 
 #[derive(Debug, Default, PartialEq)]
 #[cfg(feature = "http1")]
-pub(crate) struct RequestLine(pub(crate) http::Method, pub(crate) http::Uri);
+pub struct RequestLine(pub(crate) http::Method, pub(crate) http::Uri);
 
 /// An incoming response message.
 #[cfg(all(feature = "http1", feature = "client"))]

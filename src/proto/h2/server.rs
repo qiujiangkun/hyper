@@ -34,7 +34,7 @@ const DEFAULT_STREAM_WINDOW: u32 = 1024 * 1024; // 1mb
 const DEFAULT_MAX_FRAME_SIZE: u32 = 1024 * 16; // 16kb
 
 #[derive(Clone, Debug)]
-pub(crate) struct Config {
+pub struct Config {
     pub(crate) adaptive_window: bool,
     pub(crate) initial_conn_window_size: u32,
     pub(crate) initial_stream_window_size: u32,
@@ -63,7 +63,7 @@ impl Default for Config {
 }
 
 pin_project! {
-    pub(crate) struct Server<T, S, B, E>
+    pub struct Server<T, S, B, E>
     where
         S: HttpService<Body>,
         B: HttpBody,
@@ -103,7 +103,7 @@ where
     B: HttpBody + 'static,
     E: ConnStreamExec<S::Future, B>,
 {
-    pub(crate) fn new(io: T, service: S, config: &Config, exec: E) -> Server<T, S, B, E> {
+    pub fn new(io: T, service: S, config: &Config, exec: E) -> Server<T, S, B, E> {
         let mut builder = h2::server::Builder::default();
         builder
             .initial_window_size(config.initial_stream_window_size)
@@ -142,7 +142,7 @@ where
         }
     }
 
-    pub(crate) fn graceful_shutdown(&mut self) {
+    pub fn graceful_shutdown(&mut self) {
         trace!("graceful_shutdown");
         match self.state {
             State::Handshaking { .. } => {

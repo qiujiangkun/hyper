@@ -555,7 +555,7 @@ impl Builder {
         self
     }
 
-    pub(crate) fn h1_allow_spaces_after_header_name_in_responses(
+    pub fn h1_allow_spaces_after_header_name_in_responses(
         &mut self,
         enabled: bool,
     ) -> &mut Builder {
@@ -569,7 +569,7 @@ impl Builder {
         self
     }
 
-    pub(crate) fn h1_preserve_header_case(&mut self, enabled: bool) -> &mut Builder {
+    pub fn h1_preserve_header_case(&mut self, enabled: bool) -> &mut Builder {
         self.h1_preserve_header_case = enabled;
         self
     }
@@ -593,7 +593,7 @@ impl Builder {
     }
 
     #[cfg(feature = "ffi")]
-    pub(crate) fn http1_headers_raw(&mut self, enabled: bool) -> &mut Self {
+    pub fn http1_headers_raw(&mut self, enabled: bool) -> &mut Self {
         self.h1_headers_raw = enabled;
         self
     }

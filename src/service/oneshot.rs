@@ -5,7 +5,7 @@ use tower_service::Service;
 
 use crate::common::{task, Future, Pin, Poll};
 
-pub(crate) fn oneshot<S, Req>(svc: S, req: Req) -> Oneshot<S, Req>
+pub fn oneshot<S, Req>(svc: S, req: Req) -> Oneshot<S, Req>
 where
     S: Service<Req>,
 {

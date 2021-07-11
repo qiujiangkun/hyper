@@ -16,15 +16,15 @@ use crate::body::HttpBody;
 use crate::common::{task, Future, Pin, Poll};
 use crate::proto::h2::ping::Recorder;
 
-pub(crate) mod ping;
+pub mod ping;
 
 cfg_client! {
-    pub(crate) mod client;
+    pub mod client;
     pub(crate) use self::client::ClientTask;
 }
 
 cfg_server! {
-    pub(crate) mod server;
+    pub mod server;
     pub(crate) use self::server::Server;
 }
 

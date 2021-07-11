@@ -36,7 +36,7 @@ pub enum Exec {
 // ===== impl Exec =====
 
 impl Exec {
-    pub(crate) fn execute<F>(&self, fut: F)
+    pub fn execute<F>(&self, fut: F)
     where
         F: Future<Output = ()> + Send + 'static,
     {

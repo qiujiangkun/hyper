@@ -95,8 +95,8 @@ pub mod upgrade;
 pub mod ffi;
 
 cfg_proto! {
-    mod headers;
-    mod proto;
+    pub mod headers;
+    pub mod proto;
 }
 
 cfg_feature! {

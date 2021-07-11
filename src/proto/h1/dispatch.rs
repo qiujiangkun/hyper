@@ -12,7 +12,7 @@ use crate::proto::{
 };
 use crate::upgrade::OnUpgrade;
 
-pub(crate) struct Dispatcher<D, Bs: HttpBody, I, T> {
+pub struct Dispatcher<D, Bs: HttpBody, I, T> {
     conn: Conn<I, Bs::Data, T>,
     dispatch: D,
     body_tx: Option<crate::body::Sender>,
@@ -20,7 +20,7 @@ pub(crate) struct Dispatcher<D, Bs: HttpBody, I, T> {
     is_closing: bool,
 }
 
-pub(crate) trait Dispatch {
+pub trait Dispatch {
     type PollItem;
     type PollBody;
     type PollError;
@@ -37,7 +37,7 @@ pub(crate) trait Dispatch {
 cfg_server! {
     use crate::service::HttpService;
 
-    pub(crate) struct Server<S: HttpService<B>, B> {
+    pub struct Server<S: HttpService<B>, B> {
         in_flight: Pin<Box<Option<S::Future>>>,
         pub(crate) service: S,
     }
@@ -45,7 +45,7 @@ cfg_server! {
 
 cfg_client! {
     pin_project_lite::pin_project! {
-        pub(crate) struct Client<B> {
+        pub struct Client<B> {
             callback: Option<crate::client::dispatch::Callback<Request<B>, http::Response<Body>>>,
             #[pin]
             rx: ClientRx<B>,
@@ -69,7 +69,7 @@ where
     Bs: HttpBody + 'static,
     Bs::Error: Into<Box<dyn StdError + Send + Sync>>,
 {
-    pub(crate) fn new(dispatch: D, conn: Conn<I, Bs::Data, T>) -> Self {
+    pub fn new(dispatch: D, conn: Conn<I, Bs::Data, T>) -> Self {
         Dispatcher {
             conn,
             dispatch,
@@ -80,14 +80,14 @@ where
     }
 
     #[cfg(feature = "server")]
-    pub(crate) fn disable_keep_alive(&mut self) {
+    pub fn disable_keep_alive(&mut self) {
         self.conn.disable_keep_alive();
         if self.conn.is_write_closed() {
             self.close();
         }
     }
 
-    pub(crate) fn into_inner(self) -> (I, Bytes, D) {
+    pub fn into_inner(self) -> (I, Bytes, D) {
         let (io, buf) = self.conn.into_inner();
         (io, buf, self.dispatch)
     }
@@ -97,7 +97,7 @@ where
     ///
     /// This is useful for old-style HTTP upgrades, but ignores
     /// newer-style upgrade API.
-    pub(crate) fn poll_without_shutdown(
+    pub fn poll_without_shutdown(
         &mut self,
         cx: &mut task::Context<'_>,
     ) -> Poll<crate::Result<()>>
@@ -455,14 +455,14 @@ cfg_server! {
     where
         S: HttpService<B>,
     {
-        pub(crate) fn new(service: S) -> Server<S, B> {
+        pub fn new(service: S) -> Server<S, B> {
             Server {
                 in_flight: Box::pin(None),
                 service,
             }
         }
 
-        pub(crate) fn into_service(self) -> S {
+        pub fn into_service(self) -> S {
             self.service
         }
     }
@@ -539,7 +539,7 @@ cfg_server! {
 
 cfg_client! {
     impl<B> Client<B> {
-        pub(crate) fn new(rx: ClientRx<B>) -> Client<B> {
+        pub fn new(rx: ClientRx<B>) -> Client<B> {
             Client {
                 callback: None,
                 rx,

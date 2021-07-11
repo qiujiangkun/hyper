@@ -10,18 +10,18 @@ type StaticBuf = &'static [u8];
 
 /// Encoders to handle different Transfer-Encodings.
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) struct Encoder {
+pub struct Encoder {
     kind: Kind,
     is_last: bool,
 }
 
 #[derive(Debug)]
-pub(crate) struct EncodedBuf<B> {
+pub struct EncodedBuf<B> {
     kind: BufKind<B>,
 }
 
 #[derive(Debug)]
-pub(crate) struct NotEof;
+pub struct NotEof;
 
 #[derive(Debug, PartialEq, Clone)]
 enum Kind {
@@ -54,34 +54,34 @@ impl Encoder {
             is_last: false,
         }
     }
-    pub(crate) fn chunked() -> Encoder {
+    pub fn chunked() -> Encoder {
         Encoder::new(Kind::Chunked)
     }
 
-    pub(crate) fn length(len: u64) -> Encoder {
+    pub fn length(len: u64) -> Encoder {
         Encoder::new(Kind::Length(len))
     }
 
     #[cfg(feature = "server")]
-    pub(crate) fn close_delimited() -> Encoder {
+    pub fn close_delimited() -> Encoder {
         Encoder::new(Kind::CloseDelimited)
     }
 
-    pub(crate) fn is_eof(&self) -> bool {
+    pub fn is_eof(&self) -> bool {
         matches!(self.kind, Kind::Length(0))
     }
 
     #[cfg(feature = "server")]
-    pub(crate) fn set_last(mut self, is_last: bool) -> Self {
+    pub fn set_last(mut self, is_last: bool) -> Self {
         self.is_last = is_last;
         self
     }
 
-    pub(crate) fn is_last(&self) -> bool {
+    pub fn is_last(&self) -> bool {
         self.is_last
     }
 
-    pub(crate) fn is_close_delimited(&self) -> bool {
+    pub fn is_close_delimited(&self) -> bool {
         match self.kind {
             #[cfg(feature = "server")]
             Kind::CloseDelimited => true,
@@ -89,7 +89,7 @@ impl Encoder {
         }
     }
 
-    pub(crate) fn end<B>(&self) -> Result<Option<EncodedBuf<B>>, NotEof> {
+    pub fn end<B>(&self) -> Result<Option<EncodedBuf<B>>, NotEof> {
         match self.kind {
             Kind::Length(0) => Ok(None),
             Kind::Chunked => Ok(Some(EncodedBuf {
@@ -101,7 +101,7 @@ impl Encoder {
         }
     }
 
-    pub(crate) fn encode<B>(&mut self, msg: B) -> EncodedBuf<B>
+    pub fn encode<B>(&mut self, msg: B) -> EncodedBuf<B>
     where
         B: Buf,
     {

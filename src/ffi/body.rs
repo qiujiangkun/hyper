@@ -16,7 +16,7 @@ pub struct hyper_body(pub(super) Body);
 /// A buffer of bytes that is sent or received on a `hyper_body`.
 pub struct hyper_buf(pub(crate) Bytes);
 
-pub(crate) struct UserBody {
+pub struct UserBody {
     data_func: hyper_body_data_callback,
     userdata: *mut c_void,
 }
@@ -137,14 +137,14 @@ ffi_fn! {
 // ===== impl UserBody =====
 
 impl UserBody {
-    pub(crate) fn new() -> UserBody {
+    pub fn new() -> UserBody {
         UserBody {
             data_func: data_noop,
             userdata: std::ptr::null_mut(),
         }
     }
 
-    pub(crate) fn poll_data(&mut self, cx: &mut Context<'_>) -> Poll<Option<crate::Result<Bytes>>> {
+    pub fn poll_data(&mut self, cx: &mut Context<'_>) -> Poll<Option<crate::Result<Bytes>>> {
         let mut out = std::ptr::null_mut();
         match (self.data_func)(self.userdata, hyper_context::wrap(cx), &mut out) {
             super::task::HYPER_POLL_READY => {
@@ -166,7 +166,7 @@ impl UserBody {
         }
     }
 
-    pub(crate) fn poll_trailers(
+    pub fn poll_trailers(
         &mut self,
         _cx: &mut Context<'_>,
     ) -> Poll<crate::Result<Option<HeaderMap>>> {
