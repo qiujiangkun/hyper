@@ -58,7 +58,7 @@ macro_rules! maybe_panic {
     })
 }
 
-pub(super) fn parse_headers<T>(
+pub fn parse_headers<T>(
     bytes: &mut BytesMut,
     ctx: ParseContext<'_>,
 ) -> ParseResult<T::Incoming>
@@ -75,7 +75,7 @@ where
     T::parse(bytes, ctx)
 }
 
-pub(super) fn encode_headers<T>(
+pub fn encode_headers<T>(
     enc: Encode<'_, T::Outgoing>,
     dst: &mut Vec<u8>,
 ) -> crate::Result<Encoder>
@@ -90,10 +90,10 @@ where
 // There are 2 main roles, Client and Server.
 
 #[cfg(feature = "client")]
-pub(crate) enum Client {}
+pub enum Client {}
 
 #[cfg(feature = "server")]
-pub(crate) enum Server {}
+pub enum Server {}
 
 #[cfg(feature = "server")]
 impl Http1Transaction for Server {

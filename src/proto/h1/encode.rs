@@ -136,7 +136,7 @@ impl Encoder {
         EncodedBuf { kind }
     }
 
-    pub(super) fn encode_and_end<B>(&self, msg: B, dst: &mut WriteBuf<EncodedBuf<B>>) -> bool
+    pub fn encode_and_end<B>(&self, msg: B, dst: &mut WriteBuf<EncodedBuf<B>>) -> bool
     where
         B: Buf,
     {
@@ -185,7 +185,7 @@ impl Encoder {
     /// This is used in conjunction with HttpBody::__hyper_full_data(), which
     /// means we can trust that the buf has the correct size (the buf itself
     /// was checked to make the headers).
-    pub(super) fn danger_full_buf<B>(self, msg: B, dst: &mut WriteBuf<EncodedBuf<B>>)
+    pub fn danger_full_buf<B>(self, msg: B, dst: &mut WriteBuf<EncodedBuf<B>>)
     where
         B: Buf,
     {

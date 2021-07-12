@@ -24,13 +24,13 @@ pub struct AddrIncoming {
 }
 
 impl AddrIncoming {
-    pub(super) fn new(addr: &SocketAddr) -> crate::Result<Self> {
+    pub fn new(addr: &SocketAddr) -> crate::Result<Self> {
         let std_listener = StdTcpListener::bind(addr).map_err(crate::Error::new_listen)?;
 
         AddrIncoming::from_std(std_listener)
     }
 
-    pub(super) fn from_std(std_listener: StdTcpListener) -> crate::Result<Self> {
+    pub fn from_std(std_listener: StdTcpListener) -> crate::Result<Self> {
         // TcpListener::from_std doesn't set O_NONBLOCK
         std_listener
             .set_nonblocking(true)
@@ -205,12 +205,12 @@ mod addr_stream {
         pub struct AddrStream {
             #[pin]
             inner: TcpStream,
-            pub(super) remote_addr: SocketAddr,
+            pub remote_addr: SocketAddr,
         }
     }
 
     impl AddrStream {
-        pub(super) fn new(tcp: TcpStream, addr: SocketAddr) -> AddrStream {
+        pub fn new(tcp: TcpStream, addr: SocketAddr) -> AddrStream {
             AddrStream {
                 inner: tcp,
                 remote_addr: addr,

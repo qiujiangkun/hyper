@@ -11,7 +11,7 @@ use super::{UserDataPointer, HYPER_ITER_CONTINUE};
 use crate::body::{Body, Bytes, HttpBody as _};
 
 /// A streaming HTTP body.
-pub struct hyper_body(pub(super) Body);
+pub struct hyper_body(pub Body);
 
 /// A buffer of bytes that is sent or received on a `hyper_body`.
 pub struct hyper_buf(pub(crate) Bytes);

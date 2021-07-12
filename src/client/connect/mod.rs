@@ -110,15 +110,15 @@ pub trait Connection {
 /// was used, or if connected to an HTTP proxy.
 #[derive(Debug)]
 pub struct Connected {
-    pub(super) alpn: Alpn,
-    pub(super) is_proxied: bool,
-    pub(super) extra: Option<Extra>,
+    pub alpn: Alpn,
+    pub is_proxied: bool,
+    pub extra: Option<Extra>,
 }
 
-pub(super) struct Extra(Box<dyn ExtraInner>);
+pub struct Extra(Box<dyn ExtraInner>);
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub(super) enum Alpn {
+pub enum Alpn {
     H2,
     None,
 }
@@ -192,7 +192,7 @@ impl Connected {
     // Don't public expose that `Connected` is `Clone`, unsure if we want to
     // keep that contract...
     #[cfg(feature = "http2")]
-    pub(super) fn clone(&self) -> Connected {
+    pub fn clone(&self) -> Connected {
         Connected {
             alpn: self.alpn.clone(),
             is_proxied: self.is_proxied,
@@ -204,7 +204,7 @@ impl Connected {
 // ===== impl Extra =====
 
 impl Extra {
-    pub(super) fn set(&self, res: &mut Extensions) {
+    pub fn set(&self, res: &mut Extensions) {
         self.0.set(res);
     }
 }
@@ -268,7 +268,7 @@ where
 }
 
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub(super) mod sealed {
+pub mod sealed {
     use std::error::Error as StdError;
 
     use ::http::Uri;

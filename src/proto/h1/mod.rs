@@ -21,11 +21,11 @@ mod role;
 
 
 cfg_client! {
-    pub(crate) type ClientTransaction = role::Client;
+    pub type ClientTransaction = role::Client;
 }
 
 cfg_server! {
-    pub(crate) type ServerTransaction = role::Server;
+    pub type ServerTransaction = role::Server;
 }
 
 pub trait Http1Transaction {
@@ -90,7 +90,7 @@ pub struct Encode<'a, T> {
 
 /// Extra flags that a request "wants", like expect-continue or upgrades.
 #[derive(Clone, Copy, Debug)]
-struct Wants(u8);
+pub struct Wants(u8);
 
 impl Wants {
     const EMPTY: Wants = Wants(0b00);

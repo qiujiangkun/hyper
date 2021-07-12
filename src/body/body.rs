@@ -334,7 +334,7 @@ impl Body {
     }
 
     #[cfg(feature = "http1")]
-    pub(super) fn take_full_data(&mut self) -> Option<Bytes> {
+    pub fn take_full_data(&mut self) -> Option<Bytes> {
         if let Kind::Once(ref mut chunk) = self.kind {
             chunk.take()
         } else {

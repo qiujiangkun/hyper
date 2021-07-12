@@ -197,7 +197,7 @@ impl<T, U> Drop for Envelope<T, U> {
     }
 }
 
-pub(crate) enum Callback<T, U> {
+pub enum Callback<T, U> {
     Retry(oneshot::Sender<Result<U, (crate::Error, Option<T>)>>),
     NoRetry(oneshot::Sender<Result<U, crate::Error>>),
 }

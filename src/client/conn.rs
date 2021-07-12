@@ -140,7 +140,7 @@ where
 /// After setting options, the builder is used to create a handshake future.
 #[derive(Clone, Debug)]
 pub struct Builder {
-    pub(super) exec: Exec,
+    pub exec: Exec,
     h09_responses: bool,
     h1_parser_config: ParserConfig,
     h1_title_case_headers: bool,
@@ -202,7 +202,7 @@ pub struct Parts<T> {
 // private for now, probably not a great idea of a type...
 #[must_use = "futures do nothing unless polled"]
 #[cfg(feature = "http2")]
-pub(super) struct Http2SendRequest<B> {
+pub struct Http2SendRequest<B> {
     dispatch: dispatch::UnboundedSender<Request<B>, Response<Body>>,
 }
 
@@ -216,7 +216,7 @@ impl<B> SendRequest<B> {
         self.dispatch.poll_ready(cx)
     }
 
-    pub(super) async fn when_ready(self) -> crate::Result<Self> {
+    pub async fn when_ready(self) -> crate::Result<Self> {
         let mut me = Some(self);
         future::poll_fn(move |cx| {
             ready!(me.as_mut().unwrap().poll_ready(cx))?;
@@ -225,16 +225,16 @@ impl<B> SendRequest<B> {
         .await
     }
 
-    pub(super) fn is_ready(&self) -> bool {
+    pub fn is_ready(&self) -> bool {
         self.dispatch.is_ready()
     }
 
-    pub(super) fn is_closed(&self) -> bool {
+    pub fn is_closed(&self) -> bool {
         self.dispatch.is_closed()
     }
 
     #[cfg(feature = "http2")]
-    pub(super) fn into_http2(self) -> Http2SendRequest<B> {
+    pub fn into_http2(self) -> Http2SendRequest<B> {
         Http2SendRequest {
             dispatch: self.dispatch.unbound(),
         }
@@ -299,7 +299,7 @@ where
         ResponseFuture { inner }
     }
 
-    pub(super) fn send_request_retryable(
+    pub fn send_request_retryable(
         &mut self,
         req: Request<B>,
     ) -> impl Future<Output = Result<Response<Body>, (crate::Error, Option<Request<B>>)>> + Unpin
@@ -353,11 +353,11 @@ impl<B> fmt::Debug for SendRequest<B> {
 
 #[cfg(feature = "http2")]
 impl<B> Http2SendRequest<B> {
-    pub(super) fn is_ready(&self) -> bool {
+    pub fn is_ready(&self) -> bool {
         self.dispatch.is_ready()
     }
 
-    pub(super) fn is_closed(&self) -> bool {
+    pub fn is_closed(&self) -> bool {
         self.dispatch.is_closed()
     }
 }
@@ -367,7 +367,7 @@ impl<B> Http2SendRequest<B>
 where
     B: HttpBody + 'static,
 {
-    pub(super) fn send_request_retryable(
+    pub fn send_request_retryable(
         &mut self,
         req: Request<B>,
     ) -> impl Future<Output = Result<Response<Body>, (crate::Error, Option<Request<B>>)>>
@@ -550,7 +550,7 @@ impl Builder {
         self
     }
 
-    pub(super) fn h09_responses(&mut self, enabled: bool) -> &mut Builder {
+    pub fn h09_responses(&mut self, enabled: bool) -> &mut Builder {
         self.h09_responses = enabled;
         self
     }
@@ -564,7 +564,7 @@ impl Builder {
         self
     }
 
-    pub(super) fn h1_title_case_headers(&mut self, enabled: bool) -> &mut Builder {
+    pub fn h1_title_case_headers(&mut self, enabled: bool) -> &mut Builder {
         self.h1_title_case_headers = enabled;
         self
     }
@@ -574,14 +574,14 @@ impl Builder {
         self
     }
 
-    pub(super) fn h1_read_buf_exact_size(&mut self, sz: Option<usize>) -> &mut Builder {
+    pub fn h1_read_buf_exact_size(&mut self, sz: Option<usize>) -> &mut Builder {
         self.h1_read_buf_exact_size = sz;
         self.h1_max_buf_size = None;
         self
     }
 
     #[cfg(feature = "http1")]
-    pub(super) fn h1_max_buf_size(&mut self, max: usize) -> &mut Self {
+    pub fn h1_max_buf_size(&mut self, max: usize) -> &mut Self {
         assert!(
             max >= proto::h1::MINIMUM_MAX_BUFFER_SIZE,
             "the max_buf_size cannot be smaller than the minimum that h1 specifies."

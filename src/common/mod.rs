@@ -31,7 +31,7 @@ pub(crate) use self::lazy::{lazy, Started as Lazy};
     feature = "http2",
     feature = "runtime"
 ))]
-pub(crate) use self::never::Never;
+pub use self::never::Never;
 pub(crate) use self::task::Poll;
 
 // group up types normally needed for `Future`

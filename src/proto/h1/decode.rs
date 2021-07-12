@@ -83,7 +83,7 @@ impl Decoder {
         }
     }
 
-    pub(super) fn new(len: DecodedLength) -> Self {
+    pub fn new(len: DecodedLength) -> Self {
         match len {
             DecodedLength::CHUNKED => Decoder::chunked(),
             DecodedLength::CLOSE_DELIMITED => Decoder::eof(),

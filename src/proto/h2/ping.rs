@@ -37,11 +37,11 @@ use tokio::time::{Instant, Sleep};
 
 type WindowSize = u32;
 
-pub(super) fn disabled() -> Recorder {
+pub fn disabled() -> Recorder {
     Recorder { shared: None }
 }
 
-pub(super) fn channel(ping_pong: PingPong, config: Config) -> (Recorder, Ponger) {
+pub fn channel(ping_pong: PingPong, config: Config) -> (Recorder, Ponger) {
     debug_assert!(
         config.is_enabled(),
         "ping channel requires bdp or keep-alive config",
@@ -98,18 +98,18 @@ pub(super) fn channel(ping_pong: PingPong, config: Config) -> (Recorder, Ponger)
 }
 
 #[derive(Clone)]
-pub(super) struct Config {
-    pub(super) bdp_initial_window: Option<WindowSize>,
+pub struct Config {
+    pub bdp_initial_window: Option<WindowSize>,
     /// If no frames are received in this amount of time, a PING frame is sent.
     #[cfg(feature = "runtime")]
-    pub(super) keep_alive_interval: Option<Duration>,
+    pub keep_alive_interval: Option<Duration>,
     /// After sending a keepalive PING, the connection will be closed if
     /// a pong is not received in this amount of time.
     #[cfg(feature = "runtime")]
-    pub(super) keep_alive_timeout: Duration,
+    pub keep_alive_timeout: Duration,
     /// If true, sends pings even when there are no active streams.
     #[cfg(feature = "runtime")]
-    pub(super) keep_alive_while_idle: bool,
+    pub keep_alive_while_idle: bool,
 }
 
 #[derive(Clone)]
@@ -117,7 +117,7 @@ pub struct Recorder {
     shared: Option<Arc<Mutex<Shared>>>,
 }
 
-pub(super) struct Ponger {
+pub struct Ponger {
     bdp: Option<Bdp>,
     #[cfg(feature = "runtime")]
     keep_alive: Option<KeepAlive>,
@@ -182,7 +182,7 @@ enum KeepAliveState {
     PingSent,
 }
 
-pub(super) enum Ponged {
+pub enum Ponged {
     SizeUpdate(WindowSize),
     #[cfg(feature = "runtime")]
     KeepAliveTimedOut,
@@ -190,12 +190,12 @@ pub(super) enum Ponged {
 
 #[cfg(feature = "runtime")]
 #[derive(Debug)]
-pub(super) struct KeepAliveTimedOut;
+pub struct KeepAliveTimedOut;
 
 // ===== impl Config =====
 
 impl Config {
-    pub(super) fn is_enabled(&self) -> bool {
+    pub fn is_enabled(&self) -> bool {
         #[cfg(feature = "runtime")]
         {
             self.bdp_initial_window.is_some() || self.keep_alive_interval.is_some()
@@ -264,7 +264,7 @@ impl Recorder {
     /// If the incoming stream is already closed, convert self into
     /// a disabled reporter.
     #[cfg(feature = "client")]
-    pub(super) fn for_stream(self, stream: &h2::RecvStream) -> Self {
+    pub fn for_stream(self, stream: &h2::RecvStream) -> Self {
         if stream.is_end_stream() {
             disabled()
         } else {
@@ -272,7 +272,7 @@ impl Recorder {
         }
     }
 
-    pub(super) fn ensure_not_timed_out(&self) -> crate::Result<()> {
+    pub fn ensure_not_timed_out(&self) -> crate::Result<()> {
         #[cfg(feature = "runtime")]
         {
             if let Some(ref shared) = self.shared {
@@ -291,7 +291,7 @@ impl Recorder {
 // ===== impl Ponger =====
 
 impl Ponger {
-    pub(super) fn poll(&mut self, cx: &mut task::Context<'_>) -> Poll<Ponged> {
+    pub fn poll(&mut self, cx: &mut task::Context<'_>) -> Poll<Ponged> {
         let now = Instant::now();
         let mut locked = self.shared.lock().unwrap();
         #[cfg(feature = "runtime")]
@@ -534,7 +534,7 @@ impl KeepAlive {
 
 #[cfg(feature = "runtime")]
 impl KeepAliveTimedOut {
-    pub(super) fn crate_error(self) -> crate::Error {
+    pub fn crate_error(self) -> crate::Error {
         crate::Error::new(crate::error::Kind::Http2).with(self)
     }
 }

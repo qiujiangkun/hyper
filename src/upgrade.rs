@@ -63,12 +63,12 @@ pub fn on<T: sealed::CanUpgrade>(msg: T) -> OnUpgrade {
 }
 
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub(super) struct Pending {
+pub struct Pending {
     tx: oneshot::Sender<crate::Result<Upgraded>>,
 }
 
 #[cfg(any(feature = "http1", feature = "http2"))]
-pub(super) fn pending() -> (Pending, OnUpgrade) {
+pub fn pending() -> (Pending, OnUpgrade) {
     let (tx, rx) = oneshot::channel();
     (Pending { tx }, OnUpgrade { rx: Some(rx) })
 }
@@ -77,7 +77,7 @@ pub(super) fn pending() -> (Pending, OnUpgrade) {
 
 impl Upgraded {
     #[cfg(any(feature = "http1", feature = "http2", test))]
-    pub(super) fn new<T>(io: T, read_buf: Bytes) -> Self
+    pub fn new<T>(io: T, read_buf: Bytes) -> Self
     where
         T: AsyncRead + AsyncWrite + Unpin + Send + 'static,
     {
@@ -154,12 +154,12 @@ impl fmt::Debug for Upgraded {
 // ===== impl OnUpgrade =====
 
 impl OnUpgrade {
-    pub(super) fn none() -> Self {
+    pub fn none() -> Self {
         OnUpgrade { rx: None }
     }
 
     #[cfg(feature = "http1")]
-    pub(super) fn is_none(&self) -> bool {
+    pub fn is_none(&self) -> bool {
         self.rx.is_none()
     }
 }
@@ -189,7 +189,7 @@ impl fmt::Debug for OnUpgrade {
 
 #[cfg(any(feature = "http1", feature = "http2"))]
 impl Pending {
-    pub(super) fn fulfill(self, upgraded: Upgraded) {
+    pub fn fulfill(self, upgraded: Upgraded) {
         trace!("pending upgrade fulfill");
         let _ = self.tx.send(Ok(upgraded));
     }
@@ -197,7 +197,7 @@ impl Pending {
     #[cfg(feature = "http1")]
     /// Don't fulfill the pending Upgrade, but instead signal that
     /// upgrades are handled manually.
-    pub(super) fn manual(self) {
+    pub fn manual(self) {
         trace!("pending upgrade handled manually");
         let _ = self.tx.send(Err(crate::Error::new_user_manual_upgrade()));
     }
@@ -222,7 +222,7 @@ impl StdError for UpgradeExpected {}
 
 // ===== impl Io =====
 
-pub(super) trait Io: AsyncRead + AsyncWrite + Unpin + 'static {
+pub trait Io: AsyncRead + AsyncWrite + Unpin + 'static {
     fn __hyper_type_id(&self) -> TypeId {
         TypeId::of::<Self>()
     }

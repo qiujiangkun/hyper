@@ -21,7 +21,7 @@ pin_project! {
 
 pin_project! {
     #[project = StateProj]
-    pub(super) enum State<I, S, F, E> {
+    pub enum State<I, S, F, E> {
         Running {
             drain: Option<(Signal, Watch)>,
             #[pin]
@@ -34,7 +34,7 @@ pin_project! {
 }
 
 impl<I, S, F, E> Graceful<I, S, F, E> {
-    pub(super) fn new(spawn_all: SpawnAll<I, S, E>, signal: F) -> Self {
+    pub fn new(spawn_all: SpawnAll<I, S, E>, signal: F) -> Self {
         let drain = Some(drain::channel());
         Graceful {
             state: State::Running {

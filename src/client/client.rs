@@ -724,7 +724,7 @@ impl<B> ClientError<B> {
 
 /// A marker to identify what version a pooled connection is.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(super) enum Ver {
+pub enum Ver {
     Auto,
     Http2,
 }

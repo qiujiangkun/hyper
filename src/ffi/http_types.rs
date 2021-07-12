@@ -11,16 +11,16 @@ use crate::header::{HeaderName, HeaderValue};
 use crate::{Body, HeaderMap, Method, Request, Response, Uri};
 
 /// An HTTP request.
-pub struct hyper_request(pub(super) Request<Body>);
+pub struct hyper_request(pub Request<Body>);
 
 /// An HTTP response.
-pub struct hyper_response(pub(super) Response<Body>);
+pub struct hyper_response(pub Response<Body>);
 
 /// An HTTP header map.
 ///
 /// These can be part of a request or response.
 pub struct hyper_headers {
-    pub(super) headers: HeaderMap,
+    pub headers: HeaderMap,
     orig_casing: HeaderCaseMap,
 }
 
@@ -130,7 +130,7 @@ ffi_fn! {
 }
 
 impl hyper_request {
-    pub(super) fn finalize_request(&mut self) {
+    pub fn finalize_request(&mut self) {
         if let Some(headers) = self.0.extensions_mut().remove::<hyper_headers>() {
             *self.0.headers_mut() = headers.headers;
             self.0.extensions_mut().insert(headers.orig_casing);
@@ -242,7 +242,7 @@ ffi_fn! {
 }
 
 impl hyper_response {
-    pub(super) fn wrap(mut resp: Response<Body>) -> hyper_response {
+    pub fn wrap(mut resp: Response<Body>) -> hyper_response {
         let headers = std::mem::take(resp.headers_mut());
         let orig_casing = resp
             .extensions_mut()
@@ -281,7 +281,7 @@ type hyper_headers_foreach_callback =
     extern "C" fn(*mut c_void, *const u8, size_t, *const u8, size_t) -> c_int;
 
 impl hyper_headers {
-    pub(super) fn get_or_default(ext: &mut http::Extensions) -> &mut hyper_headers {
+    pub fn get_or_default(ext: &mut http::Extensions) -> &mut hyper_headers {
         if let None = ext.get_mut::<hyper_headers>() {
             ext.insert(hyper_headers::default());
         }

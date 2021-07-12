@@ -3,12 +3,12 @@
 cfg_http1! {
     pub mod h1;
 
-    pub(crate) use self::h1::Conn;
+    pub use self::h1::Conn;
 
     #[cfg(feature = "client")]
-    pub(crate) use self::h1::dispatch;
+    pub use self::h1::dispatch;
     #[cfg(feature = "server")]
-    pub(crate) use self::h1::ServerTransaction;
+    pub use self::h1::ServerTransaction;
 }
 
 cfg_http2! {
@@ -19,30 +19,30 @@ cfg_http2! {
 #[derive(Debug, Default)]
 pub struct MessageHead<S> {
     /// HTTP version of the message.
-    pub(crate) version: http::Version,
+    pub version: http::Version,
     /// Subject (request line or status line) of Incoming message.
-    pub(crate) subject: S,
+    pub subject: S,
     /// Headers of the Incoming message.
-    pub(crate) headers: http::HeaderMap,
+    pub headers: http::HeaderMap,
     /// Extensions.
-    extensions: http::Extensions,
+    pub extensions: http::Extensions,
 }
 
 /// An incoming request message.
 #[cfg(feature = "http1")]
-pub(crate) type RequestHead = MessageHead<RequestLine>;
+pub type RequestHead = MessageHead<RequestLine>;
 
 #[derive(Debug, Default, PartialEq)]
 #[cfg(feature = "http1")]
-pub struct RequestLine(pub(crate) http::Method, pub(crate) http::Uri);
+pub struct RequestLine(pub http::Method, pub http::Uri);
 
 /// An incoming response message.
 #[cfg(all(feature = "http1", feature = "client"))]
-pub(crate) type ResponseHead = MessageHead<http::StatusCode>;
+pub type ResponseHead = MessageHead<http::StatusCode>;
 
 #[derive(Debug)]
 #[cfg(feature = "http1")]
-pub(crate) enum BodyLength {
+pub enum BodyLength {
     /// Content-Length
     Known(u64),
     /// Transfer-Encoding: chunked (if h1)
@@ -50,7 +50,7 @@ pub(crate) enum BodyLength {
 }
 
 /// Status of when a Disaptcher future completes.
-pub(crate) enum Dispatched {
+pub enum Dispatched {
     /// Dispatcher completely shutdown connection.
     Shutdown,
     /// Dispatcher has pending upgrade, and so did not shutdown.

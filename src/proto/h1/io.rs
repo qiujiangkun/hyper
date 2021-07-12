@@ -110,7 +110,7 @@ where
 
     #[cfg(test)]
     #[cfg(feature = "nightly")]
-    pub(super) fn read_buf_mut(&mut self) -> &mut BytesMut {
+    pub fn read_buf_mut(&mut self) -> &mut BytesMut {
         &mut self.read_buf
     }
 
@@ -125,7 +125,7 @@ where
         &mut buf.bytes
     }
 
-    pub(super) fn write_buf(&mut self) -> &mut WriteBuf<B> {
+    pub fn write_buf(&mut self) -> &mut WriteBuf<B> {
         &mut self.write_buf
     }
 
@@ -150,7 +150,7 @@ where
         }
     }
 
-    pub(super) fn parse<S>(
+    pub fn parse<S>(
         &mut self,
         cx: &mut task::Context<'_>,
         parse_ctx: ParseContext<'_>,
@@ -478,7 +478,7 @@ impl<T: AsRef<[u8]>> Buf for Cursor<T> {
 }
 
 // an internal buffer to collect writes before flushes
-pub(super) struct WriteBuf<B> {
+pub struct WriteBuf<B> {
     /// Re-usable buffer that holds message headers
     headers: Cursor<Vec<u8>>,
     max_buf_size: usize,
@@ -507,7 +507,7 @@ where
         self.strategy = strategy;
     }
 
-    pub(super) fn buffer<BB: Buf + Into<B>>(&mut self, mut buf: BB) {
+    pub fn buffer<BB: Buf + Into<B>>(&mut self, mut buf: BB) {
         debug_assert!(buf.has_remaining());
         match self.strategy {
             WriteStrategy::Flatten => {

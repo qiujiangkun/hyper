@@ -72,9 +72,9 @@ use crate::service::{HttpService, MakeServiceRef};
 use crate::upgrade::Upgraded;
 
 use self::spawn_all::NewSvcTask;
-pub(super) use self::spawn_all::NoopWatcher;
-pub(super) use self::spawn_all::Watcher;
-pub(super) use self::upgrades::UpgradeableConnection;
+pub use self::spawn_all::NoopWatcher;
+pub use self::spawn_all::Watcher;
+pub use self::upgrades::UpgradeableConnection;
 
 #[cfg(feature = "tcp")]
 pub use super::tcp::{AddrIncoming, AddrStream};
@@ -119,7 +119,7 @@ pin_project! {
     /// Yields `Connecting`s that are futures that should be put on a reactor.
     #[must_use = "streams do nothing unless polled"]
     #[derive(Debug)]
-    pub(super) struct Serve<I, S, E = Exec> {
+    pub struct Serve<I, S, E = Exec> {
         #[pin]
         incoming: I,
         make_service: S,
@@ -145,12 +145,12 @@ pin_project! {
 pin_project! {
     #[must_use = "futures do nothing unless polled"]
     #[derive(Debug)]
-    pub(super) struct SpawnAll<I, S, E> {
+    pub struct SpawnAll<I, S, E> {
         // TODO: re-add `pub(super)` once rustdoc can handle this.
         //
         // See https://github.com/rust-lang/rust/issues/64705
         #[pin]
-        pub(super) serve: Serve<I, S, E>,
+        pub serve: Serve<I, S, E>,
     }
 }
 
@@ -163,7 +163,7 @@ pin_project! {
     where
         S: HttpService<Body>,
     {
-        pub(super) conn: Option<ProtoServer<T, S::ResBody, S, E>>,
+        pub conn: Option<ProtoServer<T, S::ResBody, S, E>>,
         fallback: Fallback<E>,
     }
 }
@@ -186,7 +186,7 @@ type Http2Server<T, B, S, E> = (
 
 pin_project! {
     #[project = ProtoServerProj]
-    pub(super) enum ProtoServer<T, B, S, E = Exec>
+    pub enum ProtoServer<T, B, S, E = Exec>
     where
         S: HttpService<Body>,
         B: HttpBody,
@@ -613,7 +613,7 @@ impl<E> Http<E> {
         }
     }
 
-    pub(super) fn serve<I, IO, IE, S, Bd>(&self, incoming: I, make_service: S) -> Serve<I, S, E>
+    pub fn serve<I, IO, IE, S, Bd>(&self, incoming: I, make_service: S) -> Serve<I, S, E>
     where
         I: Accept<Conn = IO, Error = IE>,
         IE: Into<Box<dyn StdError + Send + Sync>>,
@@ -881,7 +881,7 @@ impl Default for ConnectionMode {
 impl<I, S, E> Serve<I, S, E> {
     /// Get a reference to the incoming stream.
     #[inline]
-    pub(super) fn incoming_ref(&self) -> &I {
+    pub fn incoming_ref(&self) -> &I {
         &self.incoming
     }
 
@@ -894,7 +894,7 @@ impl<I, S, E> Serve<I, S, E> {
     */
 
     /// Spawn all incoming connections onto the executor in `Http`.
-    pub(super) fn spawn_all(self) -> SpawnAll<I, S, E> {
+    pub fn spawn_all(self) -> SpawnAll<I, S, E> {
         SpawnAll { serve: self }
     }
 }
@@ -960,13 +960,13 @@ where
 
 #[cfg(feature = "tcp")]
 impl<S, E> SpawnAll<AddrIncoming, S, E> {
-    pub(super) fn local_addr(&self) -> SocketAddr {
+    pub fn local_addr(&self) -> SocketAddr {
         self.serve.incoming.local_addr()
     }
 }
 
 impl<I, S, E> SpawnAll<I, S, E> {
-    pub(super) fn incoming_ref(&self) -> &I {
+    pub fn incoming_ref(&self) -> &I {
         self.serve.incoming_ref()
     }
 }
@@ -980,7 +980,7 @@ where
     B: HttpBody,
     E: ConnStreamExec<<S::Service as HttpService<Body>>::Future, B>,
 {
-    pub(super) fn poll_watch<W>(
+    pub fn poll_watch<W>(
         self: Pin<&mut Self>,
         cx: &mut task::Context<'_>,
         watcher: &W,
@@ -1098,7 +1098,7 @@ pub mod spawn_all {
 
     pin_project! {
         #[project = StateProj]
-        pub(super) enum State<I, N, S: HttpService<Body>, E, W: Watcher<I, S, E>> {
+        pub enum State<I, N, S: HttpService<Body>, E, W: Watcher<I, S, E>> {
             Connecting {
                 #[pin]
                 connecting: Connecting<I, N, E>,
@@ -1112,7 +1112,7 @@ pub mod spawn_all {
     }
 
     impl<I, N, S: HttpService<Body>, E, W: Watcher<I, S, E>> NewSvcTask<I, N, S, E, W> {
-        pub(super) fn new(connecting: Connecting<I, N, E>, watcher: W) -> Self {
+        pub fn new(connecting: Connecting<I, N, E>, watcher: W) -> Self {
             NewSvcTask {
                 state: State::Connecting {
                     connecting,
@@ -1189,7 +1189,7 @@ mod upgrades {
     where
         S: HttpService<Body>,
     {
-        pub(super) inner: Connection<T, S, E>,
+        pub inner: Connection<T, S, E>,
     }
 
     impl<I, B, S, E> UpgradeableConnection<I, S, E>

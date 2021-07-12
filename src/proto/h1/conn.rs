@@ -154,7 +154,7 @@ where
         read_buf.len() >= 24 && read_buf[..24] == *H2_PREFACE
     }
 
-    pub(super) fn poll_read_head(
+    pub fn poll_read_head(
         &mut self,
         cx: &mut task::Context<'_>,
     ) -> Poll<Option<crate::Result<(MessageHead<T::Incoming>, DecodedLength, Wants)>>> {
@@ -480,7 +480,7 @@ where
 
     pub fn write_full_msg(&mut self, head: MessageHead<T::Outgoing>, body: B) {
         if let Some(encoder) =
-            self.encode_head(head, Some(BodyLength::Known(body.remaining() as u64)))
+             self.encode_head(head, Some(BodyLength::Known(body.remaining() as u64)))
         {
             let is_last = encoder.is_last();
             // Make sure we don't write a body if we weren't actually allowed
@@ -699,7 +699,7 @@ where
     }
 
     /// If the read side can be cheaply drained, do so. Otherwise, close.
-    pub(super) fn poll_drain_or_close_read(&mut self, cx: &mut task::Context<'_>) {
+    pub fn poll_drain_or_close_read(&mut self, cx: &mut task::Context<'_>) {
         let _ = self.poll_read_body(cx);
 
         // If still in Reading::Body, just give up
@@ -739,7 +739,7 @@ where
         }
     }
 
-    pub(super) fn on_upgrade(&mut self) -> crate::upgrade::OnUpgrade {
+    pub fn on_upgrade(&mut self) -> crate::upgrade::OnUpgrade {
         trace!("{}: prepare possible HTTP upgrade", T::LOG);
         self.state.prepare_upgrade()
     }

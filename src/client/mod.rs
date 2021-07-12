@@ -62,7 +62,7 @@ cfg_feature! {
 
     mod client;
     pub mod conn;
-    pub(super) mod dispatch;
+    pub mod dispatch;
     mod pool;
     pub mod service;
 }
