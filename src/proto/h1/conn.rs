@@ -26,7 +26,7 @@ const H2_PREFACE: &[u8] = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n";
 /// or if it is complete.
 pub struct Conn<I, B, T> {
     io: Buffered<I, EncodedBuf<B>>,
-    state: State,
+    pub state: State,
     _marker: PhantomData<fn(T)>,
 }
 
@@ -54,6 +54,7 @@ where
                 notify_read: false,
                 reading: Reading::Init,
                 writing: Writing::Init,
+                message_in_queue: 0,
                 upgrade: None,
                 // We assume a modern world where the remote speaks HTTP/1.1.
                 // If they tell us otherwise, we'll downgrade in `read_head`.
@@ -123,7 +124,7 @@ where
 
     pub fn can_read_head(&self) -> bool {
         match self.state.reading {
-            Reading::Init => {
+            Reading::Init | Reading::KeepAlive => {
                 if T::should_read_first() {
                     true
                 } else {
@@ -251,6 +252,8 @@ where
                     Ok(slice) => {
                         let (reading, chunk) = if decoder.is_eof() {
                             debug!("incoming body completed");
+                            self.state.message_in_queue -= 1;
+
                             (
                                 Reading::KeepAlive,
                                 if !slice.is_empty() {
@@ -261,6 +264,8 @@ where
                             )
                         } else if slice.is_empty() {
                             error!("incoming body unexpectedly ended");
+                            self.state.message_in_queue -= 1;
+
                             // This should be unreachable, since all 3 decoders
                             // either set eof=true or return an Err when reading
                             // an empty slice...
@@ -302,10 +307,7 @@ where
         ret
     }
 
-    pub fn poll_read_keep_alive(
-        &mut self,
-        cx: &mut task::Context<'_>,
-    ) -> Poll<crate::Result<()>> {
+    pub fn poll_read_keep_alive(&mut self, cx: &mut task::Context<'_>) -> Poll<crate::Result<()>> {
         debug_assert!(!self.can_read_head() && !self.can_read_body());
 
         if self.is_read_closed() {
@@ -450,7 +452,7 @@ where
             }
         }
         match self.state.writing {
-            Writing::Init => true,
+            Writing::Init | Writing::KeepAlive => true,
             _ => false,
         }
     }
@@ -480,7 +482,7 @@ where
 
     pub fn write_full_msg(&mut self, head: MessageHead<T::Outgoing>, body: B) {
         if let Some(encoder) =
-             self.encode_head(head, Some(BodyLength::Known(body.remaining() as u64)))
+            self.encode_head(head, Some(BodyLength::Known(body.remaining() as u64)))
         {
             let is_last = encoder.is_last();
             // Make sure we don't write a body if we weren't actually allowed
@@ -488,6 +490,8 @@ where
             if !encoder.is_eof() {
                 encoder.danger_full_buf(body, self.io.write_buf());
             }
+            self.state.message_in_queue += 1;
+
             self.state.writing = if is_last {
                 Writing::Closed
             } else {
@@ -522,8 +526,8 @@ where
             buf,
         ) {
             Ok(encoder) => {
-                debug_assert!(self.state.cached_headers.is_none());
-                debug_assert!(head.headers.is_empty());
+                // debug_assert!(self.state.cached_headers.is_none());
+                // debug_assert!(head.headers.is_empty());
                 self.state.cached_headers = Some(head.headers);
                 Some(encoder)
             }
@@ -609,6 +613,7 @@ where
         let state = match self.state.writing {
             Writing::Body(ref encoder) => {
                 let can_keep_alive = encoder.encode_and_end(chunk, self.io.write_buf());
+                self.state.message_in_queue += 1;
                 if can_keep_alive {
                     Writing::KeepAlive
                 } else {
@@ -625,6 +630,7 @@ where
         debug_assert!(self.can_write_body());
 
         let mut res = Ok(());
+        self.state.message_in_queue += 1;
         let state = match self.state.writing {
             Writing::Body(ref mut encoder) => {
                 // end of stream, that means we should try to eof
@@ -757,7 +763,7 @@ impl<I, B: Buf, T> fmt::Debug for Conn<I, B, T> {
 // B and T are never pinned
 impl<I: Unpin, B, T> Unpin for Conn<I, B, T> {}
 
-struct State {
+pub struct State {
     allow_half_close: bool,
     /// Re-usable HeaderMap to reduce allocating new ones.
     cached_headers: Option<HeaderMap>,
@@ -781,9 +787,10 @@ struct State {
     /// again. See the `maybe_notify` method for more.
     notify_read: bool,
     /// State of allowed reads
-    reading: Reading,
+    pub reading: Reading,
     /// State of allowed writes
-    writing: Writing,
+    pub writing: Writing,
+    message_in_queue: usize,
     /// An expected pending HTTP upgrade.
     upgrade: Option<crate::upgrade::Pending>,
     /// Either HTTP/1.0 or 1.1 connection
@@ -791,7 +798,7 @@ struct State {
 }
 
 #[derive(Debug)]
-enum Reading {
+pub enum Reading {
     Init,
     Continue(Decoder),
     Body(Decoder),
@@ -799,7 +806,7 @@ enum Reading {
     Closed,
 }
 
-enum Writing {
+pub enum Writing {
     Init,
     Body(Encoder),
     KeepAlive,
@@ -912,7 +919,9 @@ impl State {
         match (&self.reading, &self.writing) {
             (&Reading::KeepAlive, &Writing::KeepAlive) => {
                 if let KA::Busy = self.keep_alive.status() {
-                    self.idle::<T>();
+                    if self.message_in_queue == 0 {
+                        self.idle::<T>();
+                    }
                 } else {
                     trace!(
                         "try_keep_alive({}): could keep-alive, but status = {:?}",
@@ -964,7 +973,7 @@ impl State {
 
     fn is_idle(&self) -> bool {
         if let KA::Idle = self.keep_alive.status() {
-            true
+            self.message_in_queue == 0
         } else {
             false
         }
