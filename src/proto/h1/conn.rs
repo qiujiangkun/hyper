@@ -160,7 +160,7 @@ where
         cx: &mut task::Context<'_>,
     ) -> Poll<Option<crate::Result<(MessageHead<T::Incoming>, DecodedLength, Wants)>>> {
         debug_assert!(self.can_read_head());
-        trace!("Conn::read_head");
+        // trace!("Conn::read_head");
 
         let msg = match ready!(self.io.parse::<T>(
             cx,
@@ -181,7 +181,7 @@ where
         // Note: don't deconstruct `msg` into local variables, it appears
         // the optimizer doesn't remove the extra copies.
 
-        debug!("incoming body is {}", msg.decode);
+        // debug!("incoming body is {}", msg.decode);
 
         // Prevent accepting HTTP/0.9 responses after the initial one, if any.
         self.state.h09_responses = false;
@@ -687,7 +687,7 @@ where
     pub fn poll_flush(&mut self, cx: &mut task::Context<'_>) -> Poll<io::Result<()>> {
         ready!(Pin::new(&mut self.io).poll_flush(cx))?;
         self.try_keep_alive(cx);
-        trace!("flushed({}): {:?}", T::LOG, self.state);
+        // trace!("flushed({}): {:?}", T::LOG, self.state);
         Poll::Ready(Ok(()))
     }
 
