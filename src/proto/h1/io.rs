@@ -172,7 +172,7 @@ where
                 },
             )? {
                 Some(msg) => {
-                    debug!("parsed {} headers", msg.head.headers.len());
+                    // debug!("parsed {} headers", msg.head.headers.len());
                     return Poll::Ready(Ok(msg));
                 }
                 None => {
@@ -256,7 +256,7 @@ where
                 // `poll_write_buf` doesn't exist in Tokio 0.3 yet...when
                 // `poll_write_buf` comes back, the manual advance will need to leave!
                 self.write_buf.advance(n);
-                debug!("flushed {} bytes", n);
+                // debug!("flushed {} bytes", n);
                 if self.write_buf.remaining() == 0 {
                     break;
                 } else if n == 0 {
@@ -278,7 +278,7 @@ where
     fn poll_flush_flattened(&mut self, cx: &mut task::Context<'_>) -> Poll<io::Result<()>> {
         loop {
             let n = ready!(Pin::new(&mut self.io).poll_write(cx, self.write_buf.headers.chunk()))?;
-            debug!("flushed {} bytes", n);
+            // debug!("flushed {} bytes", n);
             self.write_buf.headers.advance(n);
             if self.write_buf.headers.remaining() == 0 {
                 self.write_buf.headers.reset();

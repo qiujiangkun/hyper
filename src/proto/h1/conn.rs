@@ -251,7 +251,7 @@ where
                 match ready!(decoder.decode(cx, &mut self.io)) {
                     Ok(slice) => {
                         let (reading, chunk) = if decoder.is_eof() {
-                            debug!("incoming body completed");
+                            // debug!("incoming body completed");
                             self.state.message_in_queue -= 1;
 
                             (

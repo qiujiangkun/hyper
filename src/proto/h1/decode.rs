@@ -102,7 +102,7 @@ impl Decoder {
         cx: &mut task::Context<'_>,
         body: &mut R,
     ) -> Poll<Result<Bytes, io::Error>> {
-        trace!("decode; state={:?}", self.kind);
+        // trace!("decode; state={:?}", self.kind);
         match self.kind {
             Length(ref mut remaining) => {
                 if *remaining == 0 {
