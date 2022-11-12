@@ -58,10 +58,7 @@ macro_rules! maybe_panic {
     })
 }
 
-pub fn parse_headers<T>(
-    bytes: &mut BytesMut,
-    ctx: ParseContext<'_>,
-) -> ParseResult<T::Incoming>
+pub fn parse_headers<T>(bytes: &mut BytesMut, ctx: ParseContext<'_>) -> ParseResult<T::Incoming>
 where
     T: Http1Transaction,
 {
@@ -75,10 +72,7 @@ where
     T::parse(bytes, ctx)
 }
 
-pub fn encode_headers<T>(
-    enc: Encode<'_, T::Outgoing>,
-    dst: &mut Vec<u8>,
-) -> crate::Result<Encoder>
+pub fn encode_headers<T>(enc: Encode<'_, T::Outgoing>, dst: &mut Vec<u8>) -> crate::Result<Encoder>
 where
     T: Http1Transaction,
 {
@@ -100,7 +94,7 @@ impl Http1Transaction for Server {
     type Incoming = RequestLine;
     type Outgoing = StatusCode;
     const LOG: &'static str = "{role=server}";
-
+    #[allow(invalid_value)]
     fn parse(buf: &mut BytesMut, ctx: ParseContext<'_>) -> ParseResult<RequestLine> {
         debug_assert!(!buf.is_empty(), "parse called with empty buf");
 
@@ -860,7 +854,7 @@ impl Http1Transaction for Client {
     type Incoming = StatusCode;
     type Outgoing = RequestLine;
     const LOG: &'static str = "{role=client}";
-
+    #[allow(invalid_value)]
     fn parse(buf: &mut BytesMut, ctx: ParseContext<'_>) -> ParseResult<StatusCode> {
         debug_assert!(!buf.is_empty(), "parse called with empty buf");
 
